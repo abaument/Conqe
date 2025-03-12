@@ -11,6 +11,9 @@ export function RecentLeads() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      return;
+    }
     async function fetchRecentLeads() {
       if (!user) return;
 

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { LogIn, AlertCircle, UserPlus } from 'lucide-react';
+import { UserPlus, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
-export function Login() {
+export function Signup() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,14 +18,36 @@ export function Login() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      navigate('/');
-    } catch (err: any) {
-      if (err.message === 'Email not confirmed') {
-        setError('Please check your email to verify your account');
-      } else {
-        setError('Invalid email or password');
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (authData.user) {
+        const { error: userError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: authData.user.id,
+              email,
+              company_name: companyName,
+            },
+          ]);
+
+        if (userError) throw userError;
+
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 5000);
       }
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -36,14 +59,14 @@ export function Login() {
         <div>
           <div className="flex justify-center">
             <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
-              <LogIn className="h-6 w-6 text-white" />
+              <UserPlus className="h-6 w-6 text-white" />
             </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome back
+            Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account to manage your leads
+            Start managing your leads today
           </p>
         </div>
 
@@ -52,6 +75,22 @@ export function Login() {
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-400" />
               <p className="ml-3 text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+            <div className="flex items-center">
+              <CheckCircle2 className="h-5 w-5 text-green-400" />
+              <div className="ml-3">
+                <p className="text-sm text-green-700">
+                  Account created successfully! Please check your email to verify your account.
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  Redirecting to login page in a few seconds...
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -75,6 +114,21 @@ export function Login() {
               />
             </div>
             <div>
+              <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                Company Name
+              </label>
+              <input
+                id="company"
+                name="company"
+                type="text"
+                required
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Your Company"
+              />
+            </div>
+            <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
@@ -82,7 +136,7 @@ export function Login() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -95,9 +149,9 @@ export function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || success}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                loading
+                loading || success
                   ? 'bg-indigo-400 cursor-not-allowed'
                   : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               }`}
@@ -105,12 +159,12 @@ export function Login() {
               {loading ? (
                 <div className="flex items-center">
                   <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
-                  Signing in...
+                  Creating account...
                 </div>
               ) : (
                 <>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign in
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Sign up
                 </>
               )}
             </button>
@@ -119,9 +173,9 @@ export function Login() {
 
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
-            Need an account?{' '}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up here
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Sign in here
             </Link>
           </p>
         </div>

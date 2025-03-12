@@ -13,38 +13,44 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user data:', error);
+        return null;
+      }
+
+      return data as User;
+    } catch (err) {
+      console.error('Error in fetchUserData:', err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        // Fetch additional user data from your users table
-        supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setUser(data as User);
-            }
-          });
+        const userData = await fetchUserData(session.user.id);
+        if (userData) {
+          setUser(userData);
+        }
       }
     });
 
     // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        // Fetch additional user data from your users table
-        supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setUser(data as User);
-            }
-          });
+        const userData = await fetchUserData(session.user.id);
+        if (userData) {
+          setUser(userData);
+        }
       } else {
         setUser(null);
       }
@@ -56,11 +62,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
     if (error) throw error;
+    
+    if (!data.user?.email_confirmed_at) {
+      throw new Error('Email not confirmed');
+    }
+
+    const userData = await fetchUserData(data.user.id);
+    if (!userData) {
+      throw new Error('Unable to fetch user data');
+    }
+    
+    setUser(userData);
   };
 
   const signOut = async () => {
