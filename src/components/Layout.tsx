@@ -10,7 +10,7 @@ export function Layout() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Recent Leads', href: '/recent', icon: Users },
-    { name: 'Import Leads', href: '/import', icon: Upload },
+    { name: 'Import Companies', href: '/import', icon: Upload },
   ];
 
   return (

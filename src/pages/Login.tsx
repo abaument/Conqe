@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, AlertCircle, UserPlus } from 'lucide-react';
+import { LogIn, AlertCircle } from 'lucide-react';
+import CompanyLogo from '/Users/arthurbaument/Desktop/Conqe/dist/assets/company-logo.png';
 
 export function Login() {
   const navigate = useNavigate();
@@ -19,31 +20,30 @@ export function Login() {
     try {
       await signIn(email, password);
       navigate('/');
-    } catch (err: any) {
-      if (err.message === 'Email not confirmed') {
-        setError('Please check your email to verify your account');
-      } else {
-        setError('Invalid email or password');
-      }
+    } catch (err) {
+      setError('Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <div className="flex justify-center">
             <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
-              <LogIn className="h-6 w-6 text-white" />
+              <img
+                src={CompanyLogo}
+                alt="Logo de la société"
+                className="h-full w-full object-contain"
+              />
             </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome back
+            Conqe
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account to manage your leads
+            Connectez-vous pour accéder à votre espace
           </p>
         </div>
 
@@ -120,9 +120,9 @@ export function Login() {
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Need an account?{' '}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up here
-            </Link>
+            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Contact sales
+            </a>
           </p>
         </div>
       </div>
