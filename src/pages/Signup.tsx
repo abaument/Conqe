@@ -1,185 +1,86 @@
+// src/pages/Signup.tsx
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useNavigate, Link } from 'react-router-dom';
 
 export function Signup() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setMessage('');
 
-    try {
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-      if (signUpError) throw signUpError;
-
-      if (authData.user) {
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: authData.user.id,
-              email,
-              company_name: companyName,
-            },
-          ]);
-
-        if (userError) throw userError;
-
-        setSuccess(true);
-        setTimeout(() => {
-          navigate('/login');
-        }, 5000);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Votre compte a été créé. Vous allez être redirigé vers la page de login.");
+      // Redirection vers la page de login après 3 secondes
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     }
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-4 text-center">Créer un compte</h1>
+      <form onSubmit={handleSignup} className="space-y-4">
         <div>
-          <div className="flex justify-center">
-            <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
-              <UserPlus className="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Start managing your leads today
-          </p>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input 
+            id="email"
+            type="email"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+          />
         </div>
-
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-400" />
-              <p className="ml-3 text-sm text-red-700">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-            <div className="flex items-center">
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-              <div className="ml-3">
-                <p className="text-sm text-green-700">
-                  Account created successfully! Please check your email to verify your account.
-                </p>
-                <p className="text-sm text-green-600 mt-1">
-                  Redirecting to login page in a few seconds...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="you@company.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                Company Name
-              </label>
-              <input
-                id="company"
-                name="company"
-                type="text"
-                required
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Your Company"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading || success}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                loading || success
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
-                  Creating account...
-                </div>
-              ) : (
-                <>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Sign up
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign in here
-            </Link>
-          </p>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Mot de passe
+          </label>
+          <input 
+            id="password"
+            type="password"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required 
+          />
         </div>
-      </div>
+        <button 
+          type="submit"
+          disabled={loading}
+          className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700"
+        >
+          {loading ? 'Inscription en cours...' : 'S’inscrire'}
+        </button>
+        {message && (
+          <p className="mt-2 text-sm text-gray-600">
+            {message}
+          </p>
+        )}
+      </form>
+      <p className="mt-4 text-center text-sm text-gray-500">
+        Vous avez déjà un compte ?{' '}
+        <Link to="/login" className="text-indigo-600 hover:underline">
+          Se connecter
+        </Link>
+      </p>
     </div>
   );
 }

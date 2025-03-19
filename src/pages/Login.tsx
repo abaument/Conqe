@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, AlertCircle } from 'lucide-react';
 import CompanyLogo from '/Users/arthurbaument/Desktop/Conqe/dist/assets/company-logo.png';
@@ -26,6 +26,7 @@ export function Login() {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
@@ -60,7 +61,7 @@ export function Login() {
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                Adresse email
               </label>
               <input
                 id="email"
@@ -76,7 +77,7 @@ export function Login() {
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Mot de passe
               </label>
               <input
                 id="password"
@@ -105,12 +106,12 @@ export function Login() {
               {loading ? (
                 <div className="flex items-center">
                   <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
-                  Signing in...
+                  Connexion en cours...
                 </div>
               ) : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  Sign in
+                  Se connecter
                 </>
               )}
             </button>
@@ -119,10 +120,10 @@ export function Login() {
 
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
-            Need an account?{' '}
-            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Contact sales
-            </a>
+            Vous n'avez pas encore de compte ?{' '}
+            <Link to="/signup" className="font-medium text-indigo-600 hover:underline">
+              S'inscrire
+            </Link>
           </p>
         </div>
       </div>

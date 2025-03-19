@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, LogOut, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import BlancNoir from '/Users/arthurbaument/Desktop/Conqe/dist/assets/blanc-noir.png';
+
 
 export function Layout() {
   const location = useLocation();
@@ -20,7 +22,13 @@ export function Layout() {
         <div className="hidden md:flex md:w-64 md:flex-col">
           <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white border-r">
             <div className="flex items-center flex-shrink-0 px-4">
-              <h1 className="text-xl font-semibold">LeadTracker</h1>
+            <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
+              <img
+                src={BlancNoir}
+                alt="Logo de la société"
+                className="h-full w-full object-contain"
+              />
+            </div>
             </div>
             <div className="mt-5 flex-grow flex flex-col">
               <nav className="flex-1 px-2 space-y-1">

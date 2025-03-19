@@ -6,6 +6,7 @@ import { RecentLeads } from './pages/RecentLeads';
 import { ImportCompanies } from './pages/ImportCompanies';
 import { DisplayCompanies } from './pages/DisplayCompanies';
 import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route
             path="/"
             element={

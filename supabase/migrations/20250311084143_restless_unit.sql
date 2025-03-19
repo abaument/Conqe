@@ -36,6 +36,9 @@ CREATE TABLE companies (
 -- Activer le RLS sur companies
 ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE users ADD COLUMN approved boolean DEFAULT false;
+
+
 -- Autoriser les utilisateurs à lire uniquement leurs companies
 CREATE POLICY "Users can read own companies"
   ON companies
