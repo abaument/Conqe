@@ -8,10 +8,12 @@ export interface Lead {
   created_at: string;
   user_id: string;
   notes?: string;
+  APE_code: string;
 }
 
 export interface User {
   id: string;
   email: string;
   company_name: string;
+  APE_code: string;
 }
